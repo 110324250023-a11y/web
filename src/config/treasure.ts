@@ -8,11 +8,11 @@ export const KEY_CONFIG = {
   dragDamping: 18,
   dragBounds: { x: [-0.62, 0.62] as [number, number], y: [-0.34, 0.29] as [number, number] },
   tip: [0.31, 0, 0] as [number, number, number],
-  idleGlow: 0.26,
-  hoverGlow: 0.62,
-  brassColor: '#C78A3C',
-  highlightColor: '#F0C66B',
-  darkBrassColor: '#77501F',
+  idleGlow: 0.035,
+  hoverGlow: 0.12,
+  brassColor: '#B18448',
+  highlightColor: '#D2A84B',
+  darkBrassColor: '#5A3920',
 } as const;
 
 export const CHEST_CONFIG = {
