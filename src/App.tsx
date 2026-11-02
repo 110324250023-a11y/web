@@ -60,7 +60,7 @@ function RealisticBookReader({
     setTimeout(() => {
       setCurrentChapter(target);
       setIsFlipping(false);
-    }, 450);
+    }, 620);
   };
 
   const handleNext = () => turnToChapter(currentChapter + 1);
@@ -91,7 +91,7 @@ function RealisticBookReader({
           className="relative w-full max-w-6xl h-[94vh] bg-[#FAF6F0] text-[#3D2314] rounded-3xl border-4 border-[#3D2314] flex flex-col overflow-hidden shadow-2xl"
           style={{
             boxShadow:
-              '0 30px 80px -15px rgba(0, 0, 0, 0.95), 0 0 50px rgba(230, 159, 0, 0.25), inset 0 0 25px rgba(61, 35, 20, 0.1)',
+              '0 36px 96px -18px rgba(0, 0, 0, 0.88), 0 12px 34px rgba(34, 19, 11, 0.48), 0 0 42px rgba(230, 159, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.72), inset 0 0 28px rgba(61, 35, 20, 0.12)',
           }}
         >
           {/* Lớp xấp giấy dày hàng trăm trang ở 2 cạnh ngoài (Stacked Paper Edges) */}
@@ -116,15 +116,15 @@ function RealisticBookReader({
           <div className="absolute top-0 right-28 w-4 h-16 bg-[#E69F00] rounded-b-md shadow-md z-40 pointer-events-none" />
 
           {/* THANH ĐẦU TRANG (HEADER BAR) */}
-          <div className="px-6 py-3.5 border-b border-[#3D2314]/15 bg-[#FAF6F0] flex items-center justify-between z-20">
-            <div className="flex items-center gap-3">
+          <div className="px-3 sm:px-6 py-3.5 border-b border-[#3D2314]/15 bg-[#FAF6F0] flex items-center justify-between z-20">
+            <div className="min-w-0 flex-1 mr-2 flex items-center gap-2 sm:gap-3">
               <span className="w-2.5 h-2.5 rounded-full bg-[#E69F00] animate-pulse" />
-              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#3D2314]">
+              <span aria-label={chapterTitles[currentChapter - 1]} title={chapterTitles[currentChapter - 1]} className="min-w-0 truncate text-[10px] sm:text-sm font-bold uppercase tracking-wider text-[#3D2314]">
                 {chapterTitles[currentChapter - 1]}
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="shrink-0 flex items-center gap-2">
               <button
                 onClick={() => setIsSoundEnabled(!isSoundEnabled)}
                 className="p-1.5 rounded-lg text-[#3D2314] hover:bg-[#3D2314]/10 transition-colors cursor-pointer"
@@ -149,7 +149,7 @@ function RealisticBookReader({
             className="flex-1 relative overflow-hidden z-10"
             style={{ perspective: '2000px' }}
           >
-            <div className="w-full h-full overflow-y-auto px-6 sm:px-10 md:px-14 py-8">
+            <div className="relative z-10 w-full h-full overflow-y-auto px-6 sm:px-10 md:px-14 py-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentChapter}
@@ -164,7 +164,7 @@ function RealisticBookReader({
                     rotateY: flipDirection === 'next' ? -25 : 25,
                     scale: 0.98,
                   }}
-                  transition={{ duration: 0.4, ease: [0.38, 0.05, 0.22, 1] }}
+                  transition={{ duration: 0.52, ease: [0.38, 0.05, 0.22, 1] }}
                   className="min-h-full"
                   style={{
                     transformOrigin: flipDirection === 'next' ? 'left center' : 'right center',
@@ -187,13 +187,54 @@ function RealisticBookReader({
               </AnimatePresence>
             </div>
 
+            {/* Gutter shading makes the page spread read as a bound book. */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 left-1/2 z-0 w-3 -translate-x-1/2 pointer-events-none"
+              style={{
+                background: 'linear-gradient(90deg, rgba(61,35,20,0), rgba(61,35,20,.13) 43%, rgba(255,255,255,.42) 50%, rgba(61,35,20,.10) 58%, rgba(61,35,20,0))',
+                filter: 'drop-shadow(0 0 6px rgba(61,35,20,.12))',
+              }}
+            />
+
+            {isFlipping && (
+              <motion.div
+                aria-hidden="true"
+                initial={{ rotateY: 0 }}
+                animate={{ rotateY: flipDirection === 'next' ? -172 : 172 }}
+                transition={{ duration: 0.58, ease: [0.38, 0.05, 0.22, 1] }}
+                className={`absolute inset-y-0 z-30 w-1/2 pointer-events-none ${flipDirection === 'next' ? 'right-0' : 'left-0'}`}
+                style={{
+                  transformOrigin: flipDirection === 'next' ? 'left center' : 'right center',
+                  transformStyle: 'preserve-3d',
+                  background: flipDirection === 'next'
+                    ? 'linear-gradient(90deg, #f6eee1 0%, #fffaf2 72%, #e1d3bd 100%)'
+                    : 'linear-gradient(270deg, #f6eee1 0%, #fffaf2 72%, #e1d3bd 100%)',
+                  boxShadow: flipDirection === 'next'
+                    ? 'inset 16px 0 24px rgba(61,35,20,.13), -16px 0 24px rgba(35,20,12,.16)'
+                    : 'inset -16px 0 24px rgba(61,35,20,.13), 16px 0 24px rgba(35,20,12,.16)',
+                  backfaceVisibility: 'hidden',
+                }}
+              >
+                <div
+                  className={`absolute inset-y-0 ${flipDirection === 'next' ? 'left-0' : 'right-0'} w-3`}
+                  style={{
+                    background: flipDirection === 'next'
+                      ? 'linear-gradient(90deg, rgba(61,35,20,.22), transparent)'
+                      : 'linear-gradient(270deg, rgba(61,35,20,.22), transparent)',
+                  }}
+                />
+              </motion.div>
+            )}
+
             {/* GÓC CUỘN TRANG THÔNG MINH (DOG-EAR PEEL ON HOVER) */}
             {currentChapter < totalChapters && !isFlipping && (
               <motion.button
                 whileHover={{ scale: 1.15 }}
                 onClick={handleNext}
-                className="absolute bottom-2 right-2 w-14 h-14 group flex items-end justify-end cursor-pointer z-30 focus:outline-none"
-                title="Nhấp để lật sang chương tiếp theo"
+                aria-label="Lật tới trang tiếp theo"
+                className="absolute bottom-2 right-2 w-14 h-14 group flex items-end justify-end cursor-pointer z-30 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E69F00] focus-visible:outline-offset-2"
+                title="Nhấp để sang trang tiếp theo"
               >
                 <div className="relative w-9 h-9 group-hover:w-12 group-hover:h-12 transition-all duration-300">
                   <div
@@ -223,8 +264,9 @@ function RealisticBookReader({
               <motion.button
                 whileHover={{ scale: 1.15 }}
                 onClick={handlePrev}
-                className="absolute bottom-2 left-2 w-14 h-14 group flex items-end justify-start cursor-pointer z-30 focus:outline-none"
-                title="Nhấp để lật về chương trước"
+                aria-label="Lật về trang trước"
+                className="absolute bottom-2 left-2 w-14 h-14 group flex items-end justify-start cursor-pointer z-30 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E69F00] focus-visible:outline-offset-2"
+                title="Nhấp để về trang trước"
               >
                 <div className="relative w-9 h-9 group-hover:w-12 group-hover:h-12 transition-all duration-300">
                   <div
@@ -252,25 +294,26 @@ function RealisticBookReader({
           </div>
 
           {/* THANH ĐIỀU HƯỚNG CUỐI SÁCH (FOOTER BAR) */}
-          <div className="px-6 py-3.5 border-t border-[#3D2314]/15 bg-[#FAF6F0] flex items-center justify-between z-20">
+          <div className="px-2 sm:px-6 py-2.5 sm:py-3.5 border-t border-[#3D2314]/15 bg-[#FAF6F0] flex items-center justify-between z-20">
             <button
               onClick={handlePrev}
               disabled={currentChapter === 1 || isFlipping}
-              className="px-4 py-2 rounded-xl text-xs font-bold border border-[#3D2314]/30 text-[#3D2314] hover:bg-[#3D2314]/10 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold border border-[#3D2314]/30 text-[#3D2314] hover:bg-[#3D2314]/10 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-[0_3px_12px_rgba(61,35,20,0.12)] hover:shadow-[0_7px_20px_rgba(61,35,20,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E69F00]"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Chương trước</span>
+              <span>Trang trước</span>
             </button>
 
             {/* Các nốt chấm chuyển chương */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5 sm:gap-2">
               {[1, 2, 3, 4].map((c) => (
                 <button
                   key={c}
                   onClick={() => turnToChapter(c)}
                   disabled={isFlipping}
-                  className="group p-1 cursor-pointer focus:outline-none"
+                  className="group p-0.5 sm:p-1 cursor-pointer rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E69F00]"
                   title={chapterTitles[c - 1]}
+                  aria-label={`Đi tới trang ${c}: ${chapterTitles[c - 1]}`}
                 >
                   <span
                     className={`block rounded-full transition-all duration-300 ${
@@ -282,16 +325,16 @@ function RealisticBookReader({
                 </button>
               ))}
               <span className="text-xs font-semibold text-[#6B4C38] ml-2 hidden sm:inline">
-                Chương {currentChapter} / {totalChapters}
+                Trang {currentChapter} / {totalChapters}
               </span>
             </div>
 
             <button
               onClick={handleNext}
               disabled={currentChapter === totalChapters || isFlipping}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#3D2314] text-[#FAF6F0] hover:bg-[#E69F00] hover:text-[#3D2314] disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+              className="px-2 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold bg-[#3D2314] text-[#FAF6F0] hover:bg-[#E69F00] hover:text-[#3D2314] disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-[0_5px_16px_rgba(61,35,20,0.24)] hover:shadow-[0_8px_22px_rgba(61,35,20,0.32)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E69F00]"
             >
-              <span>Chương sau</span>
+              <span>Trang sau</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

@@ -4,6 +4,10 @@ import { Sparkles, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { PALETTE } from '../types';
 
+const BOOKSHELF_GROUP_Y = -0.1;
+const SHELF_LEVEL_CENTERS = [-1.2, -0.4, 0.45, 1.15];
+const SHELF_SURFACES = SHELF_LEVEL_CENTERS.map((centerY) => BOOKSHELF_GROUP_Y + centerY + 0.03);
+
 export function BookshelfBay() {
   const oakMaterial = useMemo(
     () =>
@@ -17,7 +21,7 @@ export function BookshelfBay() {
   );
 
   return (
-    <group position={[0, -0.1, -0.6]}>
+    <group position={[0, BOOKSHELF_GROUP_Y, -0.6]}>
       <mesh position={[0, 0, -0.32]} receiveShadow>
         <boxGeometry args={[4.4, 3.4, 0.04]} />
         <meshPhysicalMaterial color="#543318" roughness={0.8} />
@@ -83,40 +87,45 @@ export function BackgroundShelfBooks() {
     const list = [];
     for (let i = 0; i < 9; i++) {
       list.push({
-        pos: [-1.8 + i * 0.11, -0.15, -0.55],
+        pos: [-1.8 + i * 0.11, 0, -0.55],
         size: [0.08, 0.45 + (i % 3) * 0.05, 0.32],
+        shelfSurfaceY: SHELF_SURFACES[1],
         color: bookColors[i % bookColors.length],
         rot: [0, (Math.random() - 0.5) * 0.04, 0],
       });
     }
     for (let i = 0; i < 3; i++) {
       list.push({
-        pos: [-0.45 + i * 0.1, -0.15, -0.55],
+        pos: [-0.45 + i * 0.1, 0, -0.55],
         size: [0.075, 0.44 + (i % 2) * 0.04, 0.3],
+        shelfSurfaceY: SHELF_SURFACES[1],
         color: bookColors[(i + 4) % bookColors.length],
         rot: [0, 0, 0],
       });
     }
     for (let i = 0; i < 3; i++) {
       list.push({
-        pos: [0.25 + i * 0.1, -0.15, -0.55],
+        pos: [0.25 + i * 0.1, 0, -0.55],
         size: [0.075, 0.46, 0.3],
+        shelfSurfaceY: SHELF_SURFACES[1],
         color: bookColors[(i + 1) % bookColors.length],
         rot: [0, 0, 0],
       });
     }
     for (let i = 0; i < 9; i++) {
       list.push({
-        pos: [0.9 + i * 0.11, -0.15, -0.55],
+        pos: [0.9 + i * 0.11, 0, -0.55],
         size: [0.08, 0.46 + (i % 4) * 0.04, 0.32],
+        shelfSurfaceY: SHELF_SURFACES[1],
         color: bookColors[(i + 3) % bookColors.length],
         rot: [0, (Math.random() - 0.5) * 0.04, 0],
       });
     }
     for (let i = 0; i < 11; i++) {
       list.push({
-        pos: [-0.55 + i * 0.1, 0.7, -0.55],
+        pos: [-0.55 + i * 0.1, 0, -0.55],
         size: [0.075, 0.44 + (i % 3) * 0.04, 0.3],
+        shelfSurfaceY: SHELF_SURFACES[2],
         color: bookColors[(i + 5) % bookColors.length],
         rot: [0, 0, 0],
       });
@@ -129,7 +138,7 @@ export function BackgroundShelfBooks() {
       {books.map((b, idx) => (
         <mesh
           key={idx}
-          position={b.pos as [number, number, number]}
+          position={[b.pos[0], b.shelfSurfaceY + b.size[1] / 2 + 0.002, b.pos[2]]}
           rotation={b.rot as [number, number, number]}
           castShadow
           receiveShadow
@@ -139,8 +148,8 @@ export function BackgroundShelfBooks() {
         </mesh>
       ))}
 
-      <group position={[-1.25, 0.65, -0.45]}>
-        <mesh castShadow>
+      <group position={[-1.25, SHELF_SURFACES[2] + 0.15, -0.45]}>
+        <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.08, 0.16, 0.18, 32]} />
           <meshPhysicalMaterial
             color="#FFF4D4"
@@ -149,14 +158,14 @@ export function BackgroundShelfBooks() {
             roughness={0.3}
           />
         </mesh>
-        <mesh position={[0, -0.12, 0]}>
+        <mesh position={[0, -0.12, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.09, 0.1, 0.06, 32]} />
           <meshPhysicalMaterial color="#5A3A1E" roughness={0.8} />
         </mesh>
         <pointLight color="#FFAE42" intensity={0.6} distance={1.6} decay={2} />
       </group>
 
-      <mesh position={[1.4, 0.7, -0.5]} castShadow>
+      <mesh position={[1.4, SHELF_SURFACES[2] + 0.18, -0.5]} castShadow receiveShadow>
         <cylinderGeometry args={[0.1, 0.14, 0.36, 24]} />
         <meshPhysicalMaterial color="#E8DAC6" roughness={0.35} clearcoat={0.3} />
       </mesh>
@@ -215,7 +224,7 @@ export function HeroBookOnShelf({
   return (
     <group
       ref={bookGroupRef}
-      position={[-0.05, -0.12, -0.45]}
+      position={[-0.05, SHELF_SURFACES[1] + 0.54 / 2 + 0.002, -0.45]}
       onClick={(e) => {
         e.stopPropagation();
         onOpenBook();
