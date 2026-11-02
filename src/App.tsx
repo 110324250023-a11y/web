@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   BookOpen,
   Volume2,
@@ -34,15 +34,21 @@ function RealisticBookReader({
   onClose: () => void;
 }) {
   const [currentChapter, setCurrentChapter] = useState<number>(1);
+  const [turnTarget, setTurnTarget] = useState<number | null>(null);
   const [isFlipping, setIsFlipping] = useState<boolean>(false);
   const [flipDirection, setFlipDirection] = useState<'next' | 'prev'>('next');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pageScrollPosition = useRef(0);
 
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [lightboxTitle, setLightboxTitle] = useState<string | null>(null);
   const [showExcel, setShowExcel] = useState<boolean>(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
+  const prefersReducedMotion = useReducedMotion();
 
   const totalChapters = 4;
+  const pageTurnDuration = prefersReducedMotion ? 0.18 : 0.78;
+  const pageTurnDurationMs = pageTurnDuration * 1000;
   const chapterTitles = [
     'Chương I: Tổng Quan Báo Cáo & Đội Ngũ',
     'Chương II: Dữ Liệu Các Quý (Q4/23 – Q3/26)',
@@ -55,13 +61,34 @@ function RealisticBookReader({
 
     if (isSoundEnabled) playPageTurnSound();
     setFlipDirection(target > currentChapter ? 'next' : 'prev');
+    pageScrollPosition.current = scrollContainerRef.current?.scrollTop ?? 0;
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0;
+    setTurnTarget(target);
     setIsFlipping(true);
 
     setTimeout(() => {
       setCurrentChapter(target);
+      setTurnTarget(null);
       setIsFlipping(false);
-    }, 620);
+    }, pageTurnDurationMs);
   };
+
+  const renderChapterContent = (chapter: number) => (
+    <>
+      {chapter === 1 && <Chapter1 />}
+      {chapter === 2 && <Chapter2 />}
+      {chapter === 3 && (
+        <Chapter3Dashboard
+          onOpenLightbox={(img, title) => {
+            setLightboxImage(img);
+            setLightboxTitle(title);
+          }}
+          onOpenExcel={() => setShowExcel(true)}
+        />
+      )}
+      {chapter === 4 && <Chapter4Defense />}
+    </>
+  );
 
   const handleNext = () => turnToChapter(currentChapter + 1);
   const handlePrev = () => turnToChapter(currentChapter - 1);
@@ -149,42 +176,10 @@ function RealisticBookReader({
             className="flex-1 relative overflow-hidden z-10"
             style={{ perspective: '2000px' }}
           >
-            <div className="relative z-10 w-full h-full overflow-y-auto px-6 sm:px-10 md:px-14 py-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentChapter}
-                  initial={{
-                    opacity: 0,
-                    rotateY: flipDirection === 'next' ? 25 : -25,
-                    scale: 0.98,
-                  }}
-                  animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-                  exit={{
-                    opacity: 0,
-                    rotateY: flipDirection === 'next' ? -25 : 25,
-                    scale: 0.98,
-                  }}
-                  transition={{ duration: 0.52, ease: [0.38, 0.05, 0.22, 1] }}
-                  className="min-h-full"
-                  style={{
-                    transformOrigin: flipDirection === 'next' ? 'left center' : 'right center',
-                    transformStyle: 'preserve-3d',
-                  }}
-                >
-                  {currentChapter === 1 && <Chapter1 />}
-                  {currentChapter === 2 && <Chapter2 />}
-                  {currentChapter === 3 && (
-                    <Chapter3Dashboard
-                      onOpenLightbox={(img, title) => {
-                        setLightboxImage(img);
-                        setLightboxTitle(title);
-                      }}
-                      onOpenExcel={() => setShowExcel(true)}
-                    />
-                  )}
-                  {currentChapter === 4 && <Chapter4Defense />}
-                </motion.div>
-              </AnimatePresence>
+            <div ref={scrollContainerRef} className="relative z-10 w-full h-full overflow-y-auto px-6 sm:px-10 md:px-14 py-8">
+              <div key={turnTarget ?? currentChapter} className="min-h-full">
+                {renderChapterContent(turnTarget ?? currentChapter)}
+              </div>
             </div>
 
             {/* Gutter shading makes the page spread read as a bound book. */}
@@ -197,33 +192,43 @@ function RealisticBookReader({
               }}
             />
 
-            {isFlipping && (
+            {isFlipping && turnTarget !== null && (
               <motion.div
                 aria-hidden="true"
+                inert
                 initial={{ rotateY: 0 }}
-                animate={{ rotateY: flipDirection === 'next' ? -172 : 172 }}
-                transition={{ duration: 0.58, ease: [0.38, 0.05, 0.22, 1] }}
-                className={`absolute inset-y-0 z-30 w-1/2 pointer-events-none ${flipDirection === 'next' ? 'right-0' : 'left-0'}`}
+                animate={{ rotateY: flipDirection === 'next' ? -180 : 180 }}
+                transition={{ duration: pageTurnDuration, ease: [0.42, 0, 0.18, 1] }}
+                className="absolute inset-0 z-30 pointer-events-none"
                 style={{
                   transformOrigin: flipDirection === 'next' ? 'left center' : 'right center',
                   transformStyle: 'preserve-3d',
-                  background: flipDirection === 'next'
-                    ? 'linear-gradient(90deg, #f6eee1 0%, #fffaf2 72%, #e1d3bd 100%)'
-                    : 'linear-gradient(270deg, #f6eee1 0%, #fffaf2 72%, #e1d3bd 100%)',
                   boxShadow: flipDirection === 'next'
-                    ? 'inset 16px 0 24px rgba(61,35,20,.13), -16px 0 24px rgba(35,20,12,.16)'
-                    : 'inset -16px 0 24px rgba(61,35,20,.13), 16px 0 24px rgba(35,20,12,.16)',
+                    ? '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)'
+                    : '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)',
                   backfaceVisibility: 'hidden',
                 }}
               >
                 <div
-                  className={`absolute inset-y-0 ${flipDirection === 'next' ? 'left-0' : 'right-0'} w-3`}
+                  className="absolute inset-0 overflow-hidden bg-[#FAF6F0]"
                   style={{
-                    background: flipDirection === 'next'
-                      ? 'linear-gradient(90deg, rgba(61,35,20,.22), transparent)'
-                      : 'linear-gradient(270deg, rgba(61,35,20,.22), transparent)',
+                    backfaceVisibility: 'hidden',
+                    borderInline: '1px solid rgba(112,78,50,.14)',
+                    boxShadow: flipDirection === 'next'
+                      ? 'inset 18px 0 30px rgba(61,35,20,.09)'
+                      : 'inset -18px 0 30px rgba(61,35,20,.09)',
                   }}
-                />
+                >
+                  <div
+                    className="px-6 sm:px-10 md:px-14 py-8"
+                    style={{ transform: `translateY(-${pageScrollPosition.current}px)` }}
+                  >
+                    {renderChapterContent(currentChapter)}
+                  </div>
+                  <div
+                    className={`absolute inset-y-0 ${flipDirection === 'next' ? 'right-0' : 'left-0'} w-[3px] bg-gradient-to-b from-[#d1bd9c] via-white to-[#d1bd9c] shadow-[0_0_9px_rgba(61,35,20,0.2)]`}
+                  />
+                </div>
               </motion.div>
             )}
 
