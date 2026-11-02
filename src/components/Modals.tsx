@@ -75,59 +75,59 @@ export function ExcelPreviewModal({ isOpen, onClose }: { isOpen: boolean; onClos
           </button>
         </div>
 
-        <div className="overflow-x-auto flex-1 border border-[#3D2314]/20 rounded-lg text-[13px] shadow-[inset_0_1px_3px_rgba(61,35,20,0.06)]">
+        <div className="overflow-x-auto flex-1 border border-[#3D2314]/30 rounded-xl text-[13px] shadow-[inset_0_2px_4px_rgba(61,35,20,0.08)] bg-[#FFFDF9]">
           <table className="w-full text-left border-collapse">
             <caption className="sr-only">Bản xem trước 5 khách hàng trong bộ dữ liệu đã làm sạch</caption>
-            <thead className="bg-[#3D2314] text-[#FAF6F0] uppercase tracking-wider text-xs shadow-sm">
+            <thead className="bg-[#2D160A] text-[#FAF6F0] uppercase tracking-wider text-xs shadow-md border-b-2 border-[#E69F00]">
               <tr>
-                <th className="py-2.5 px-3">CustomerID</th>
-                <th className="py-2.5 px-3">Kênh Thu Hút</th>
-                <th className="py-2.5 px-3">Sản Phẩm</th>
-                <th className="py-2.5 px-3">Hạng Thành Viên</th>
-                <th className="py-2.5 px-3 text-right">CLV (VNĐ)</th>
-                <th className="py-2.5 px-3 text-center">Trạng Thái</th>
+                <th className="py-3 px-3.5 font-bold tracking-wider">CustomerID</th>
+                <th className="py-3 px-3.5 font-bold tracking-wider">Kênh Thu Hút</th>
+                <th className="py-3 px-3.5 font-bold tracking-wider">Sản Phẩm</th>
+                <th className="py-3 px-3.5 font-bold tracking-wider">Hạng Thành Viên</th>
+                <th className="py-3 px-3.5 text-right font-bold tracking-wider">CLV (VNĐ)</th>
+                <th className="py-3 px-3.5 text-center font-bold tracking-wider">Trạng Thái</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#3D2314]/15 text-[#3D2314]">
-              <tr className="bg-white/35 hover:bg-[#E69F00]/10 transition-colors">
-                <td className="py-2.5 px-3 font-mono font-semibold text-[#3D2314]">CCN_001</td>
-                <td className="py-2 px-3">Search ads</td>
-                <td className="py-2 px-3">Serum Bí Đao</td>
-                <td className="py-2.5 px-3 font-semibold text-amber-800">Gold</td>
-                <td className="py-2 px-3 text-right font-mono font-bold">4.850.000</td>
-                <td className="py-2 px-3 text-center"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-medium">Hoạt động</span></td>
+            <tbody className="divide-y divide-[#3D2314]/20 text-[#2D160A]">
+              <tr className="bg-[#FFFDF9] hover:bg-[#E69F00]/15 transition-colors">
+                <td className="py-3 px-3.5 font-mono font-extrabold text-[#2D160A]">CCN_001</td>
+                <td className="py-3 px-3.5 font-semibold text-[#3D2214]">Search ads</td>
+                <td className="py-3 px-3.5 font-medium text-[#261309]">Serum Bí Đao</td>
+                <td className="py-3 px-3.5 font-extrabold text-[#995C00]">Gold</td>
+                <td className="py-3 px-3.5 text-right font-mono font-extrabold text-[#2D160A]">4.850.000</td>
+                <td className="py-3 px-3.5 text-center"><span className="px-2.5 py-1 rounded-md bg-emerald-700 text-white text-[11px] font-bold shadow-sm">Hoạt động</span></td>
               </tr>
-              <tr className="bg-[#3D2314]/[0.025] hover:bg-[#E69F00]/10 transition-colors">
-                <td className="py-2.5 px-3 font-mono font-semibold text-[#3D2314]">CCN_002</td>
-                <td className="py-2 px-3">Referral</td>
-                <td className="py-2 px-3">Toner Cà Phê</td>
-                <td className="py-2 px-3 font-semibold">Member</td>
-                <td className="py-2 px-3 text-right font-mono font-bold">420.000</td>
-                <td className="py-2 px-3 text-center"><span className="px-2 py-0.5 rounded bg-[#D87093]/30 text-[#852844] text-[10px] font-medium">Đã rời bỏ (64%)</span></td>
+              <tr className="bg-[#F6EFE5] hover:bg-[#E69F00]/15 transition-colors">
+                <td className="py-3 px-3.5 font-mono font-extrabold text-[#2D160A]">CCN_002</td>
+                <td className="py-3 px-3.5 font-semibold text-[#3D2214]">Referral</td>
+                <td className="py-3 px-3.5 font-medium text-[#261309]">Toner Cà Phê</td>
+                <td className="py-3 px-3.5 font-bold text-[#5C3720]">Member</td>
+                <td className="py-3 px-3.5 text-right font-mono font-extrabold text-[#2D160A]">420.000</td>
+                <td className="py-3 px-3.5 text-center"><span className="px-2.5 py-1 rounded-md bg-[#C55375] text-white text-[11px] font-bold shadow-sm">Đã rời bỏ (64%)</span></td>
               </tr>
-              <tr className="bg-white/35 hover:bg-[#E69F00]/10 transition-colors">
-                <td className="py-2.5 px-3 font-mono font-semibold text-[#3D2314]">CCN_003</td>
-                <td className="py-2 px-3">Marketplace</td>
-                <td className="py-2 px-3">Dưỡng thể Cà phê</td>
-                <td className="py-2 px-3 font-semibold text-amber-700">Bronze</td>
-                <td className="py-2 px-3 text-right font-mono font-bold">1.280.000</td>
-                <td className="py-2 px-3 text-center"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-medium">Hoạt động (Sub 15)</span></td>
+              <tr className="bg-[#FFFDF9] hover:bg-[#E69F00]/15 transition-colors">
+                <td className="py-3 px-3.5 font-mono font-extrabold text-[#2D160A]">CCN_003</td>
+                <td className="py-3 px-3.5 font-semibold text-[#3D2214]">Marketplace</td>
+                <td className="py-3 px-3.5 font-medium text-[#261309]">Dưỡng thể Cà phê</td>
+                <td className="py-3 px-3.5 font-extrabold text-[#A85116]">Bronze</td>
+                <td className="py-3 px-3.5 text-right font-mono font-extrabold text-[#2D160A]">1.280.000</td>
+                <td className="py-3 px-3.5 text-center"><span className="px-2.5 py-1 rounded-md bg-emerald-700 text-white text-[11px] font-bold shadow-sm">Hoạt động (Sub 15)</span></td>
               </tr>
-              <tr className="bg-[#3D2314]/[0.025] hover:bg-[#E69F00]/10 transition-colors">
-                <td className="py-2.5 px-3 font-mono font-semibold text-[#3D2314]">CCN_004</td>
-                <td className="py-2 px-3">Instagram</td>
-                <td className="py-2 px-3">Sữa rửa mặt Nghệ Hưng Yên</td>
-                <td className="py-2 px-3 font-semibold text-slate-600">Silver</td>
-                <td className="py-2 px-3 text-right font-mono font-bold">2.640.000</td>
-                <td className="py-2 px-3 text-center"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-medium">Hoạt động</span></td>
+              <tr className="bg-[#F6EFE5] hover:bg-[#E69F00]/15 transition-colors">
+                <td className="py-3 px-3.5 font-mono font-extrabold text-[#2D160A]">CCN_004</td>
+                <td className="py-3 px-3.5 font-semibold text-[#3D2214]">Instagram</td>
+                <td className="py-3 px-3.5 font-medium text-[#261309]">Sữa rửa mặt Nghệ Hưng Yên</td>
+                <td className="py-3 px-3.5 font-extrabold text-[#3B4657]">Silver</td>
+                <td className="py-3 px-3.5 text-right font-mono font-extrabold text-[#2D160A]">2.640.000</td>
+                <td className="py-3 px-3.5 text-center"><span className="px-2.5 py-1 rounded-md bg-emerald-700 text-white text-[11px] font-bold shadow-sm">Hoạt động</span></td>
               </tr>
-              <tr className="bg-white/35 hover:bg-[#E69F00]/10 transition-colors">
-                <td className="py-2.5 px-3 font-mono font-semibold text-[#3D2314]">CCN_005</td>
-                <td className="py-2 px-3">TikTok</td>
-                <td className="py-2 px-3">Tẩy da chết Môi</td>
-                <td className="py-2.5 px-3 font-semibold text-amber-800">Gold</td>
-                <td className="py-2 px-3 text-right font-mono font-bold">4.630.000</td>
-                <td className="py-2 px-3 text-center"><span className="px-2 py-0.5 rounded bg-[#D87093]/30 text-[#852844] text-[10px] font-medium">Đã rời bỏ (50% Gold)</span></td>
+              <tr className="bg-[#FFFDF9] hover:bg-[#E69F00]/15 transition-colors">
+                <td className="py-3 px-3.5 font-mono font-extrabold text-[#2D160A]">CCN_005</td>
+                <td className="py-3 px-3.5 font-semibold text-[#3D2214]">TikTok</td>
+                <td className="py-3 px-3.5 font-medium text-[#261309]">Tẩy da chết Môi</td>
+                <td className="py-3 px-3.5 font-extrabold text-[#995C00]">Gold</td>
+                <td className="py-3 px-3.5 text-right font-mono font-extrabold text-[#2D160A]">4.630.000</td>
+                <td className="py-3 px-3.5 text-center"><span className="px-2.5 py-1 rounded-md bg-[#C55375] text-white text-[11px] font-bold shadow-sm">Đã rời bỏ (50% Gold)</span></td>
               </tr>
             </tbody>
           </table>

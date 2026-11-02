@@ -18,7 +18,7 @@ export function Chapter2() {
       <div>
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-extrabold text-[#E69F00] mb-1">
           <Calendar className="w-4 h-4" />
-          <span>Chương II · Dữ Liệu Các Quý (Q4/23 – Q3/26)</span>
+          <span>Trang 2 · Dữ Liệu Các Quý (Q4/23 – Q3/26)</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold font-serif text-[#3D2314]">
           Quy Luật Biến Động Khách Hàng Theo Từng Quý

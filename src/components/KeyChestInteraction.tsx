@@ -126,7 +126,7 @@ export function KeyChestInteraction({
   }, [keyHovered, stage, isReading]);
 
   const pointerDown = (event: ThreeEvent<PointerEvent>) => {
-    if (stage !== 'idle' || isReading || interactionsLocked || !keyRef.current) return;
+    if (stage !== 'idle' || isReading || clipOpen || !keyRef.current) return;
     event.stopPropagation();
     keyRef.current.updateWorldMatrix(true, false);
     dragStart.current.setFromMatrixPosition(keyRef.current.matrixWorld);
@@ -279,8 +279,20 @@ export function KeyChestInteraction({
         onPointerMove={pointerMove}
         onPointerUp={pointerUp}
         onPointerCancel={cancelDrag}
-        onPointerOver={(event) => { event.stopPropagation(); if (stage === 'idle') setKeyHovered(true); }}
-        onPointerOut={(event) => { event.stopPropagation(); if (stage === 'idle') setKeyHovered(false); }}
+        onPointerOver={(event) => {
+          event.stopPropagation();
+          if (stage === 'idle') {
+            setKeyHovered(true);
+            onInteractionBusyChange(true);
+          }
+        }}
+        onPointerOut={(event) => {
+          event.stopPropagation();
+          if (stage === 'idle') {
+            setKeyHovered(false);
+            onInteractionBusyChange(false);
+          }
+        }}
       >
         {/* A quiet, camera-facing target keeps the fine key silhouette easy to grab. */}
         <mesh position={[0.04, 0.02, 0.045]}>
@@ -288,7 +300,13 @@ export function KeyChestInteraction({
           <meshBasicMaterial transparent opacity={0} colorWrite={false} depthWrite={false} />
         </mesh>
         <TreasureKeyModel />
-        <pointLight ref={keyGlowRef} position={[0, 0.02, 0.2]} color="#E6B65A" intensity={KEY_CONFIG.idleGlow} distance={0.7} decay={2} />
+        <pointLight ref={keyGlowRef} position={[0, 0.02, 0.22]} color="#FFE0A0" intensity={KEY_CONFIG.idleGlow} distance={0.9} decay={2} />
+        <pointLight position={[-0.15, 0.12, -0.06]} color="#FFCA68" intensity={0.45} distance={0.8} decay={2} />
+        {/* Bóng mờ chiếu lên vách kệ sau chìa khóa */}
+        <mesh position={[0, 0, -0.04]}>
+          <planeGeometry args={[0.52, 0.26]} />
+          <meshBasicMaterial color="#0A0503" transparent opacity={0.38} depthWrite={false} />
+        </mesh>
       </group>
     </>
   );

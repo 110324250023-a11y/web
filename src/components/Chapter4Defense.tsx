@@ -57,7 +57,7 @@ export function Chapter4Defense() {
       <div>
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-extrabold text-[#E69F00] mb-1">
           <HelpCircle className="w-4 h-4" />
-          <span>Chương IV · Phản Biện Hội Đồng & Tra Cứu Tài Liệu</span>
+          <span>Trang 4 · Phản Biện Hội Đồng & Tra Cứu Tài Liệu</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold font-serif text-[#3D2314]">
           Mô Phỏng Phản Biện Cold Calling & Tra Cứu Tài Liệu

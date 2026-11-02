@@ -9,7 +9,7 @@ export function Chapter1() {
       <div className="bg-[#3D2314] text-[#FAF6F0] rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[#4A2E1B] shadow-lg">
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-extrabold text-[#E69F00] mb-2">
           <Bookmark className="w-4 h-4" />
-          <span>Chương I · Tổng Quan Báo Cáo</span>
+          <span>Trang 1 · Tổng Quan Báo Cáo</span>
         </div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-serif text-[#FAF6F0] leading-tight mb-3">
           Báo Cáo Phân Tích Dữ Liệu Khách Hàng Cocoon Vietnam

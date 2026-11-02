@@ -551,7 +551,7 @@ export default function App() {
             <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#1A140F]/85 backdrop-blur-md border border-[#E69F00]/60 shadow-2xl">
               <span className="w-2.5 h-2.5 rounded-full bg-[#E69F00] animate-ping" />
               <span className="text-xs md:text-sm font-semibold tracking-wide text-[#FAF6F0]">
-                Kéo <span className="text-[#E69F00] font-bold">chìa đồng lên rương</span> để mở clip · nhấp cuốn sách báo cáo để đọc
+                Kéo <span className="text-[#E69F00] font-bold">chìa đồng (ngăn giữa bên trái) lên rương gỗ (tầng trên)</span> để mở clip bí mật · Nhấp cuốn sách báo cáo ở giữa để đọc
               </span>
             </div>
             <span className="text-[11px] text-[#FAF6F0]/60 tracking-wider font-mono">
