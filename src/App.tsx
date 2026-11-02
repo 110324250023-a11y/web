@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -22,6 +22,120 @@ import { Chapter1 } from './components/Chapter1';
 import { Chapter2 } from './components/Chapter2';
 import { Chapter3Dashboard } from './components/Chapter3Dashboard';
 import { Chapter4Defense } from './components/Chapter4Defense';
+
+type BookPageTurnProps = {
+  direction: 'next' | 'prev';
+  duration: number;
+  reducedMotion: boolean;
+  frontScrollTop: number;
+  frontPage: ReactNode;
+  backPage: ReactNode;
+};
+
+function BookPageTurn({
+  direction,
+  duration,
+  reducedMotion,
+  frontScrollTop,
+  frontPage,
+  backPage,
+}: BookPageTurnProps) {
+  const sign = direction === 'next' ? -1 : 1;
+  const turnTimes = [0, 0.12, 0.52, 0.9, 1];
+  const turnEase: [number, number, number, number] = [0.42, 0, 0.18, 1];
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      inert
+      initial={{ rotateY: 0, rotateX: 0, z: 0, scaleX: 1, opacity: 1 }}
+      animate={
+        reducedMotion
+          ? { rotateY: 0, rotateX: 0, z: 0, scaleX: 1, opacity: 0 }
+          : {
+              rotateY: [0, sign * 8, sign * 78, sign * 153, sign * 180],
+              rotateX: [0, -1.2, 1.4, -0.7, 0],
+              z: [0, 12, 34, 16, 0],
+              scaleX: [1, 1.01, 0.965, 0.99, 1],
+              boxShadow: [
+                '0 2px 6px rgba(38, 23, 14, 0.06)',
+                '8px 16px 28px rgba(38, 23, 14, 0.18)',
+                '0 26px 42px rgba(38, 23, 14, 0.30)',
+                '-8px 16px 28px rgba(38, 23, 14, 0.18)',
+                '0 2px 6px rgba(38, 23, 14, 0.06)',
+              ],
+            }
+      }
+      transition={
+        reducedMotion
+          ? { duration, ease: 'easeOut' }
+          : { duration, times: turnTimes, ease: turnEase }
+      }
+      className="absolute inset-0 z-30 pointer-events-none"
+      style={{
+        transformOrigin: '50% 50%',
+        transformStyle: 'preserve-3d',
+        willChange: 'transform, box-shadow',
+      }}
+    >
+      <div
+        className="absolute inset-0 overflow-hidden bg-[#FAF6F0]"
+        style={{
+          backfaceVisibility: 'hidden',
+          borderInline: '1px solid rgba(112, 78, 50, 0.16)',
+          boxShadow:
+            direction === 'next'
+              ? 'inset 22px 0 34px rgba(61, 35, 20, 0.12), inset -5px 0 12px rgba(61, 35, 20, 0.04)'
+              : 'inset -22px 0 34px rgba(61, 35, 20, 0.12), inset 5px 0 12px rgba(61, 35, 20, 0.04)',
+        }}
+      >
+        <div
+          className="px-6 sm:px-10 md:px-14 py-8"
+          style={{ transform: 'translateY(-' + frontScrollTop + 'px)' }}
+        >
+          {frontPage}
+        </div>
+      </div>
+
+      <div
+        className="absolute inset-0 overflow-hidden bg-[#F7F0E5]"
+        style={{
+          transform: 'rotateY(180deg)',
+          backfaceVisibility: 'hidden',
+          borderInline: '1px solid rgba(112, 78, 50, 0.16)',
+          boxShadow:
+            direction === 'next'
+              ? 'inset -22px 0 34px rgba(61, 35, 20, 0.13), inset 5px 0 12px rgba(61, 35, 20, 0.04)'
+              : 'inset 22px 0 34px rgba(61, 35, 20, 0.13), inset -5px 0 12px rgba(61, 35, 20, 0.04)',
+        }}
+      >
+        <div className="px-6 sm:px-10 md:px-14 py-8">{backPage}</div>
+      </div>
+
+      {/* Soft specular ridge that follows the curling edge of the paper. */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute inset-y-0 left-1/2 z-10 w-1/6"
+        initial={{ x: direction === 'next' ? '300%' : '-300%', opacity: 0.02, scaleX: 0.35 }}
+        animate={{
+          x: direction === 'next' ? '-300%' : '300%',
+          opacity: [0.02, 0.56, 0.42, 0.02],
+          scaleX: [0.35, 1.12, 0.82, 0.3],
+        }}
+        transition={{ duration, times: turnTimes, ease: turnEase }}
+        style={{
+          transformOrigin: direction === 'next' ? 'left center' : 'right center',
+          background:
+            direction === 'next'
+              ? 'linear-gradient(90deg, rgba(255,255,255,.78), rgba(255,255,255,.24) 34%, rgba(61,35,20,.2) 72%, transparent)'
+              : 'linear-gradient(270deg, rgba(255,255,255,.78), rgba(255,255,255,.24) 34%, rgba(61,35,20,.2) 72%, transparent)',
+          filter: 'blur(3px)',
+          backfaceVisibility: 'hidden',
+        }}
+      />
+    </motion.div>
+  );
+}
 
 /* =========================================================================
    REALISTIC 3D BOOK READER OVERLAY (UNIFIED WHOLE-PAGE PER CHAPTER)
@@ -44,10 +158,10 @@ function RealisticBookReader({
   const [lightboxTitle, setLightboxTitle] = useState<string | null>(null);
   const [showExcel, setShowExcel] = useState<boolean>(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion() ?? false;
 
   const totalChapters = 4;
-  const pageTurnDuration = prefersReducedMotion ? 0.18 : 0.78;
+  const pageTurnDuration = prefersReducedMotion ? 0.2 : 0.96;
   const pageTurnDurationMs = pageTurnDuration * 1000;
   const chapterTitles = [
     'Chương I: Tổng Quan Báo Cáo & Đội Ngũ',
@@ -174,7 +288,7 @@ function RealisticBookReader({
           {/* KHÔNG GIAN TOÀN TRANG CHƯƠNG VỚI HIỆU ỨNG LẬT 3D CHÂN THỰC */}
           <div
             className="flex-1 relative overflow-hidden z-10"
-            style={{ perspective: '2000px' }}
+            style={{ perspective: '1500px', perspectiveOrigin: '50% 50%' }}
           >
             <div ref={scrollContainerRef} className="relative z-10 w-full h-full overflow-y-auto px-6 sm:px-10 md:px-14 py-8">
               <div key={turnTarget ?? currentChapter} className="min-h-full">
@@ -182,92 +296,26 @@ function RealisticBookReader({
               </div>
             </div>
 
-            {/* Gutter shading makes the page spread read as a bound book. */}
+            {/* The crease stays visible at rest and deepens while a leaf turns. */}
             <div
               aria-hidden="true"
-              className="absolute inset-y-0 left-1/2 z-0 w-3 -translate-x-1/2 pointer-events-none"
+              className="absolute inset-y-0 left-1/2 z-20 w-2 -translate-x-1/2 pointer-events-none"
               style={{
-                background: 'linear-gradient(90deg, rgba(61,35,20,0), rgba(61,35,20,.13) 43%, rgba(255,255,255,.42) 50%, rgba(61,35,20,.10) 58%, rgba(61,35,20,0))',
-                filter: 'drop-shadow(0 0 6px rgba(61,35,20,.12))',
+                background: 'linear-gradient(90deg, rgba(61,35,20,.06), rgba(61,35,20,.18) 44%, rgba(255,255,255,.48) 50%, rgba(61,35,20,.12) 62%, rgba(61,35,20,.04))',
+                opacity: isFlipping ? 0.3 : 0.78,
+                filter: 'drop-shadow(0 0 5px rgba(61,35,20,.14))',
               }}
             />
 
             {isFlipping && turnTarget !== null && (
-              <motion.div
-                aria-hidden="true"
-                className="absolute inset-0 z-20 pointer-events-none"
-                initial={{ opacity: 0, backgroundPosition: flipDirection === 'next' ? '135% 0' : '-35% 0' }}
-                animate={{
-                  opacity: [0, 0.58, 0.12, 0],
-                  backgroundPosition: flipDirection === 'next'
-                    ? ['135% 0', '75% 0', '30% 0', '-35% 0']
-                    : ['-35% 0', '30% 0', '75% 0', '135% 0'],
-                }}
-                transition={{ duration: pageTurnDuration, times: [0, 0.32, 0.72, 1], ease: [0.42, 0, 0.18, 1] }}
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, transparent 38%, rgba(45,26,15,.23) 49%, rgba(45,26,15,.06) 53%, transparent 64%)',
-                  backgroundSize: '200% 100%',
-                  filter: 'blur(9px)',
-                }}
+              <BookPageTurn
+                direction={flipDirection}
+                duration={pageTurnDuration}
+                reducedMotion={prefersReducedMotion}
+                frontScrollTop={pageScrollPosition.current}
+                frontPage={renderChapterContent(currentChapter)}
+                backPage={renderChapterContent(turnTarget)}
               />
-            )}
-
-            {isFlipping && turnTarget !== null && (
-              <motion.div
-                aria-hidden="true"
-                inert
-                initial={{ rotateY: 0 }}
-                animate={{
-                  rotateY: flipDirection === 'next' ? -180 : 180,
-                  scaleX: [1, 0.975, 1],
-                }}
-                transition={{ duration: pageTurnDuration, ease: [0.42, 0, 0.18, 1] }}
-                className="absolute inset-0 z-30 pointer-events-none"
-                style={{
-                  transformOrigin: 'center center',
-                  transformStyle: 'preserve-3d',
-                  boxShadow: '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)',
-                }}
-              >
-                <div
-                  className="absolute inset-0 overflow-hidden bg-[#FAF6F0]"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    borderInline: '1px solid rgba(112,78,50,.14)',
-                    boxShadow: flipDirection === 'next'
-                      ? 'inset 18px 0 30px rgba(61,35,20,.09)'
-                      : 'inset -18px 0 30px rgba(61,35,20,.09)',
-                  }}
-                >
-                  <div
-                    className="px-6 sm:px-10 md:px-14 py-8"
-                    style={{ transform: `translateY(-${pageScrollPosition.current}px)` }}
-                  >
-                    {renderChapterContent(currentChapter)}
-                  </div>
-                  <div
-                    className={`absolute inset-y-0 ${flipDirection === 'next' ? 'right-0' : 'left-0'} w-[3px] bg-gradient-to-b from-[#d1bd9c] via-white to-[#d1bd9c] shadow-[0_0_9px_rgba(61,35,20,0.2)]`}
-                  />
-                </div>
-                <div
-                  className="absolute inset-0 overflow-hidden bg-[#F7F0E5]"
-                  style={{
-                    transform: 'rotateY(180deg)',
-                    backfaceVisibility: 'hidden',
-                    borderInline: '1px solid rgba(112,78,50,.14)',
-                    boxShadow: flipDirection === 'next'
-                      ? 'inset -18px 0 30px rgba(61,35,20,.10)'
-                      : 'inset 18px 0 30px rgba(61,35,20,.10)',
-                  }}
-                >
-                  <div className="px-6 sm:px-10 md:px-14 py-8">
-                    {renderChapterContent(turnTarget)}
-                  </div>
-                  <div
-                    className={`absolute inset-y-0 ${flipDirection === 'next' ? 'left-0' : 'right-0'} w-[3px] bg-gradient-to-b from-[#d1bd9c] via-white to-[#d1bd9c] shadow-[0_0_9px_rgba(61,35,20,0.2)]`}
-                  />
-                </div>
-              </motion.div>
             )}
 
             {/* GÓC CUỘN TRANG THÔNG MINH (DOG-EAR PEEL ON HOVER) */}
