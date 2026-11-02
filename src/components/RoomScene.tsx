@@ -1,8 +1,9 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Sparkles, ContactShadows } from '@react-three/drei';
+import { Sparkles, ContactShadows, Environment, Lightformer } from '@react-three/drei';
 import * as THREE from 'three';
 import { PALETTE } from '../types';
+import { KeyChestInteraction } from './KeyChestInteraction';
 
 const BOOKSHELF_GROUP_Y = -0.1;
 const SHELF_LEVEL_CENTERS = [-1.2, -0.4, 0.45, 1.15];
@@ -227,7 +228,7 @@ export function HeroBookOnShelf({
       position={[-0.05, SHELF_SURFACES[1] + 0.54 / 2 + 0.002, -0.45]}
       onClick={(e) => {
         e.stopPropagation();
-        onOpenBook();
+        if (!isReading) onOpenBook();
       }}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -307,9 +308,23 @@ export function HeroBookOnShelf({
 export function CozyRoomScene({
   onOpenBook,
   isReading,
+  interactionsLocked,
+  clipOpen,
+  onFadeStart,
+  onOpenClip,
+  onInteractionBusyChange,
+  keyLabelRef,
+  chestLabelRef,
 }: {
   onOpenBook: () => void;
   isReading: boolean;
+  interactionsLocked: boolean;
+  clipOpen: boolean;
+  onFadeStart: () => void;
+  onOpenClip: () => void;
+  onInteractionBusyChange: (busy: boolean) => void;
+  keyLabelRef: React.RefObject<HTMLDivElement | null>;
+  chestLabelRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
     <>
@@ -324,10 +339,24 @@ export function CozyRoomScene({
       />
       <pointLight position={[0, 3.2, 1.2]} intensity={0.8} color="#FFF1DB" decay={2} distance={7} />
       <pointLight position={[0, 1.8, 1.5]} intensity={0.9} color="#FFF2DA" decay={2} distance={4} />
+      <Environment resolution={128} background={false} frames={1}>
+        <Lightformer form="rect" intensity={1.25} color="#FFD9A5" position={[0, 1.5, 3]} scale={[3.5, 1.8, 1]} />
+        <Lightformer form="rect" intensity={0.65} color="#D99645" position={[-3, 1, 0]} rotation={[0, Math.PI / 2, 0]} scale={[1.6, 3, 1]} />
+      </Environment>
 
       <BookshelfBay />
       <BackgroundShelfBooks />
-      <HeroBookOnShelf onOpenBook={onOpenBook} isReading={isReading} />
+      <HeroBookOnShelf onOpenBook={onOpenBook} isReading={isReading || interactionsLocked} />
+      <KeyChestInteraction
+        isReading={isReading}
+        interactionsLocked={interactionsLocked}
+        clipOpen={clipOpen}
+        onFadeStart={onFadeStart}
+        onOpenClip={onOpenClip}
+        onInteractionBusyChange={onInteractionBusyChange}
+        keyLabelRef={keyLabelRef}
+        chestLabelRef={chestLabelRef}
+      />
 
       <mesh position={[0, -1.75, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[12, 10]} />

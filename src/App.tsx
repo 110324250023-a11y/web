@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, type ReactNode } from 'react';
+import React, { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -22,6 +22,7 @@ import { Chapter1 } from './components/Chapter1';
 import { Chapter2 } from './components/Chapter2';
 import { Chapter3Dashboard } from './components/Chapter3Dashboard';
 import { Chapter4Defense } from './components/Chapter4Defense';
+import { ClipModal } from './components/ClipModal';
 
 type BookPageTurnProps = {
   direction: 'next' | 'prev';
@@ -43,97 +44,121 @@ function BookPageTurn({
   const sign = direction === 'next' ? -1 : 1;
   const turnTimes = [0, 0.12, 0.52, 0.9, 1];
   const turnEase: [number, number, number, number] = [0.42, 0, 0.18, 1];
+  const turningPageSide = direction === 'next' ? 'right' : 'left';
+  const stationaryPageSide = direction === 'next' ? 'left' : 'right';
+  const reversePageSide = direction === 'next' ? 'left' : 'right';
 
-  return (
-    <motion.div
-      aria-hidden="true"
-      inert
-      initial={{ rotateY: 0, rotateX: 0, z: 0, scaleX: 1, opacity: 1 }}
-      animate={
-        reducedMotion
-          ? { rotateY: 0, rotateX: 0, z: 0, scaleX: 1, opacity: 0 }
-          : {
-              rotateY: [0, sign * 8, sign * 78, sign * 153, sign * 180],
-              rotateX: [0, -1.2, 1.4, -0.7, 0],
-              z: [0, 12, 34, 16, 0],
-              scaleX: [1, 1.01, 0.965, 0.99, 1],
-              boxShadow: [
-                '0 2px 6px rgba(38, 23, 14, 0.06)',
-                '8px 16px 28px rgba(38, 23, 14, 0.18)',
-                '0 26px 42px rgba(38, 23, 14, 0.30)',
-                '-8px 16px 28px rgba(38, 23, 14, 0.18)',
-                '0 2px 6px rgba(38, 23, 14, 0.06)',
-              ],
-            }
-      }
-      transition={
-        reducedMotion
-          ? { duration, ease: 'easeOut' }
-          : { duration, times: turnTimes, ease: turnEase }
-      }
-      className="absolute inset-0 z-30 pointer-events-none"
+  const spreadPage = (content: ReactNode, side: 'left' | 'right', scrollTop: number) => (
+    <div
+      className="absolute inset-y-0 left-0 w-[200%] px-6 sm:px-10 md:px-14 py-8"
       style={{
-        transformOrigin: '50% 50%',
-        transformStyle: 'preserve-3d',
-        willChange: 'transform, box-shadow',
+        transform:
+          'translateX(' + (side === 'left' ? '0%' : '-50%') + ') translateY(-' + scrollTop + 'px)',
       }}
     >
+      {content}
+    </div>
+  );
+
+  return (
+    <div aria-hidden="true" inert className="absolute inset-0 z-30 pointer-events-none">
+      {/* The page that stays on the table until the turning leaf covers it. */}
       <div
-        className="absolute inset-0 overflow-hidden bg-[#FAF6F0]"
+        className={`absolute inset-y-0 ${direction === 'next' ? 'left-0' : 'right-0'} z-20 w-1/2 overflow-hidden bg-[#FAF6F0]`}
         style={{
-          backfaceVisibility: 'hidden',
-          borderInline: '1px solid rgba(112, 78, 50, 0.16)',
           boxShadow:
             direction === 'next'
-              ? 'inset 22px 0 34px rgba(61, 35, 20, 0.12), inset -5px 0 12px rgba(61, 35, 20, 0.04)'
-              : 'inset -22px 0 34px rgba(61, 35, 20, 0.12), inset 5px 0 12px rgba(61, 35, 20, 0.04)',
+              ? 'inset -18px 0 24px rgba(61, 35, 20, 0.1)'
+              : 'inset 18px 0 24px rgba(61, 35, 20, 0.1)',
+        }}
+      >
+        {spreadPage(frontPage, stationaryPageSide, frontScrollTop)}
+      </div>
+
+      {/* A single leaf is hinged at the center gutter and swings to the other side. */}
+      <motion.div
+        initial={{ rotateY: 0, rotateX: 0, z: 0, scaleX: 1, opacity: 1 }}
+        animate={
+          reducedMotion
+            ? { rotateY: 0, rotateX: 0, z: 0, scaleX: 1, opacity: 0 }
+            : {
+                rotateY: [0, sign * 8, sign * 78, sign * 153, sign * 180],
+                rotateX: [0, -1.2, 1.4, -0.7, 0],
+                z: [0, 12, 34, 16, 0],
+                scaleX: [1, 1.01, 0.965, 0.99, 1],
+                boxShadow: [
+                  '0 2px 6px rgba(38, 23, 14, 0.06)',
+                  '8px 16px 28px rgba(38, 23, 14, 0.18)',
+                  '0 26px 42px rgba(38, 23, 14, 0.30)',
+                  '-8px 16px 28px rgba(38, 23, 14, 0.18)',
+                  '0 2px 6px rgba(38, 23, 14, 0.06)',
+                ],
+              }
+        }
+        transition={
+          reducedMotion
+            ? { duration, ease: 'easeOut' }
+            : { duration, times: turnTimes, ease: turnEase }
+        }
+        className={`absolute inset-y-0 ${direction === 'next' ? 'left-1/2' : 'left-0'} z-30 w-1/2 pointer-events-none`}
+        style={{
+          transformOrigin: direction === 'next' ? 'left center' : 'right center',
+          transformStyle: 'preserve-3d',
+          willChange: 'transform, box-shadow',
         }}
       >
         <div
-          className="px-6 sm:px-10 md:px-14 py-8"
-          style={{ transform: 'translateY(-' + frontScrollTop + 'px)' }}
+          className="absolute inset-0 overflow-hidden bg-[#FAF6F0]"
+          style={{
+            backfaceVisibility: 'hidden',
+            borderInline: '1px solid rgba(112, 78, 50, 0.16)',
+            boxShadow:
+              direction === 'next'
+                ? 'inset 22px 0 34px rgba(61, 35, 20, 0.12), inset -5px 0 12px rgba(61, 35, 20, 0.04)'
+                : 'inset -22px 0 34px rgba(61, 35, 20, 0.12), inset 5px 0 12px rgba(61, 35, 20, 0.04)',
+          }}
         >
-          {frontPage}
+          {spreadPage(frontPage, turningPageSide, frontScrollTop)}
         </div>
-      </div>
 
-      <div
-        className="absolute inset-0 overflow-hidden bg-[#F7F0E5]"
-        style={{
-          transform: 'rotateY(180deg)',
-          backfaceVisibility: 'hidden',
-          borderInline: '1px solid rgba(112, 78, 50, 0.16)',
-          boxShadow:
-            direction === 'next'
-              ? 'inset -22px 0 34px rgba(61, 35, 20, 0.13), inset 5px 0 12px rgba(61, 35, 20, 0.04)'
-              : 'inset 22px 0 34px rgba(61, 35, 20, 0.13), inset -5px 0 12px rgba(61, 35, 20, 0.04)',
-        }}
-      >
-        <div className="px-6 sm:px-10 md:px-14 py-8">{backPage}</div>
-      </div>
+        <div
+          className="absolute inset-0 overflow-hidden bg-[#F7F0E5]"
+          style={{
+            transform: 'rotateY(180deg)',
+            backfaceVisibility: 'hidden',
+            borderInline: '1px solid rgba(112, 78, 50, 0.16)',
+            boxShadow:
+              direction === 'next'
+                ? 'inset -22px 0 34px rgba(61, 35, 20, 0.13), inset 5px 0 12px rgba(61, 35, 20, 0.04)'
+                : 'inset 22px 0 34px rgba(61, 35, 20, 0.13), inset -5px 0 12px rgba(61, 35, 20, 0.04)',
+          }}
+        >
+          {spreadPage(backPage, reversePageSide, 0)}
+        </div>
 
-      {/* Soft specular ridge that follows the curling edge of the paper. */}
-      <motion.div
-        aria-hidden="true"
-        className="absolute inset-y-0 left-1/2 z-10 w-1/6"
-        initial={{ x: direction === 'next' ? '300%' : '-300%', opacity: 0.02, scaleX: 0.35 }}
-        animate={{
-          x: direction === 'next' ? '-300%' : '300%',
-          opacity: [0.02, 0.56, 0.42, 0.02],
-          scaleX: [0.35, 1.12, 0.82, 0.3],
-        }}
-        transition={{ duration, times: turnTimes, ease: turnEase }}
-        style={{
-          transformOrigin: direction === 'next' ? 'left center' : 'right center',
-          background:
-            direction === 'next'
-              ? 'linear-gradient(90deg, rgba(255,255,255,.78), rgba(255,255,255,.24) 34%, rgba(61,35,20,.2) 72%, transparent)'
-              : 'linear-gradient(270deg, rgba(255,255,255,.78), rgba(255,255,255,.24) 34%, rgba(61,35,20,.2) 72%, transparent)',
-          filter: 'blur(3px)',
-          backfaceVisibility: 'hidden',
-        }}
-      />
-    </motion.div>
+        {/* Paper sheen travels from the outer edge back toward the binding. */}
+        <motion.div
+          aria-hidden="true"
+          className={`absolute inset-y-0 ${direction === 'next' ? 'left-full' : 'left-0'} z-10 w-1/6`}
+          initial={{ x: 0, opacity: 0.02, scaleX: 0.35 }}
+          animate={{
+            x: direction === 'next' ? '-600%' : '600%',
+            opacity: [0.02, 0.56, 0.42, 0.02],
+            scaleX: [0.35, 1.12, 0.82, 0.3],
+          }}
+          transition={{ duration, times: turnTimes, ease: turnEase }}
+          style={{
+            transformOrigin: direction === 'next' ? 'left center' : 'right center',
+            background:
+              direction === 'next'
+                ? 'linear-gradient(90deg, rgba(255,255,255,.78), rgba(255,255,255,.24) 34%, rgba(61,35,20,.2) 72%, transparent)'
+                : 'linear-gradient(270deg, rgba(255,255,255,.78), rgba(255,255,255,.24) 34%, rgba(61,35,20,.2) 72%, transparent)',
+            filter: 'blur(3px)',
+            backfaceVisibility: 'hidden',
+          }}
+        />
+      </motion.div>
+    </div>
   );
 }
 
@@ -447,7 +472,25 @@ function RealisticBookReader({
    APP CHÍNH (THE BOOKSHELF EXPERIENCE)
 ========================================================================= */
 export default function App() {
+  const [compactLayout, setCompactLayout] = useState(() => window.innerWidth < 640);
   const [isReading, setIsReading] = useState(false);
+  const [isClipOpen, setIsClipOpen] = useState(false);
+  const [isTreasureFading, setIsTreasureFading] = useState(false);
+  const [interactionBusy, setInteractionBusy] = useState(false);
+  const interactionBusyRef = useRef(false);
+  const keyLabelRef = useRef<HTMLDivElement>(null);
+  const chestLabelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const syncLayout = () => setCompactLayout(window.innerWidth < 640);
+    window.addEventListener('resize', syncLayout);
+    return () => window.removeEventListener('resize', syncLayout);
+  }, []);
+  const handleInteractionBusyChange = useCallback((busy: boolean) => {
+    interactionBusyRef.current = busy;
+    setInteractionBusy(busy);
+  }, []);
+  const interactionsLocked = interactionBusy || isTreasureFading || isClipOpen;
+  const cameraPosition: [number, number, number] = compactLayout ? [0, 0.1, 3.2] : [0, 0.1, 2.2];
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#120E0B] select-none">
@@ -459,25 +502,45 @@ export default function App() {
       >
         <Canvas
           shadows
+          dpr={[1, 2]}
+          style={{ touchAction: 'none' }}
           gl={{
             antialias: true,
             alpha: false,
             powerPreference: 'high-performance',
           }}
-          camera={{ position: [0, 0.1, 2.2], fov: 45 }}
+          camera={{ position: cameraPosition, fov: compactLayout ? 52 : 45 }}
         >
           <CozyRoomScene
             onOpenBook={() => {
+              if (interactionBusyRef.current || isTreasureFading || isClipOpen) return;
               playPageTurnSound();
               setIsReading(true);
             }}
             isReading={isReading}
+            interactionsLocked={interactionsLocked}
+            clipOpen={isClipOpen}
+            onFadeStart={() => setIsTreasureFading(true)}
+            onOpenClip={() => setIsClipOpen(true)}
+            onInteractionBusyChange={handleInteractionBusyChange}
+            keyLabelRef={keyLabelRef}
+            chestLabelRef={chestLabelRef}
           />
         </Canvas>
       </div>
 
+      <div ref={keyLabelRef} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 whitespace-nowrap -translate-x-1/2 -translate-y-full rounded-full border border-[#C18B39]/55 bg-[#1A100A]/90 px-3 py-1.5 text-[10px] font-bold tracking-[0.08em] text-[#E8CEA0] shadow-lg" style={{ display: 'none' }} />
+      <div ref={chestLabelRef} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 whitespace-nowrap -translate-x-1/2 -translate-y-full rounded-full border border-[#D3A14B]/75 bg-[#1A100A]/92 px-3 py-1.5 text-xs font-semibold text-[#F8E8C8] shadow-[0_8px_24px_rgba(0,0,0,.38)]" style={{ display: 'none' }} />
+
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-40 bg-[#080503]"
+        animate={{ opacity: isTreasureFading ? 0.92 : 0 }}
+        transition={{ duration: 0.42, ease: 'easeOut' }}
+      />
+
       {/* 2. CHỈ DẪN TƯƠNG TÁC THƯ VIỆN ẤM ÁP */}
-      {!isReading && (
+      {!isReading && !isTreasureFading && !isClipOpen && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -488,7 +551,7 @@ export default function App() {
             <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#1A140F]/85 backdrop-blur-md border border-[#E69F00]/60 shadow-2xl">
               <span className="w-2.5 h-2.5 rounded-full bg-[#E69F00] animate-ping" />
               <span className="text-xs md:text-sm font-semibold tracking-wide text-[#FAF6F0]">
-                Nhấp vào <span className="text-[#E69F00] font-bold">Cuốn Sách Báo Cáo</span> trên kệ để lấy xuống đọc
+                Kéo <span className="text-[#E69F00] font-bold">chìa đồng lên rương</span> để mở clip · nhấp cuốn sách báo cáo để đọc
               </span>
             </div>
             <span className="text-[11px] text-[#FAF6F0]/60 tracking-wider font-mono">
@@ -499,7 +562,7 @@ export default function App() {
       )}
 
       {/* 3. NÚT TRUY CẬP NHANH GÓC PHẢI */}
-      {!isReading && (
+      {!isReading && !isTreasureFading && !isClipOpen && (
         <button
           onClick={() => {
             playPageTurnSound();
@@ -514,6 +577,13 @@ export default function App() {
 
       {/* 4. GIAO DIỆN MỞ SÁCH THỰC TẾ & LẬT TRANG CHÂN THẬT */}
       <RealisticBookReader isOpen={isReading} onClose={() => setIsReading(false)} />
+      <ClipModal
+        isOpen={isClipOpen}
+        onClose={() => {
+          setIsClipOpen(false);
+          setIsTreasureFading(false);
+        }}
+      />
     </div>
   );
 }
