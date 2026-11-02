@@ -2,15 +2,31 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle, ChevronRight, CheckCircle2, Sparkles, Send } from 'lucide-react';
 import { COLD_CALLING_QUESTIONS } from '../data/mockData';
+import { answerCocoonQuestion } from '../data/cocoonKnowledge';
+
+type ChatMessage = {
+  role: 'ai' | 'user';
+  text: string;
+  sources?: string[];
+  hasCaveat?: boolean;
+};
+
+const QUICK_QUESTIONS = [
+  'CLV trung vị và trung bình là bao nhiêu?',
+  'Kênh nào có tỷ lệ rời bỏ cao nhất?',
+  '15 hội viên subscription có thuộc Marketplace × Dưỡng thể không?',
+];
+
+const MAX_CHAT_LENGTH = 300;
 
 export function Chapter4Defense() {
   const [activeQuestion, setActiveQuestion] = useState<number>(1);
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
   const [userNotes, setUserNotes] = useState<Record<number, string>>({});
-  const [chatMessages, setChatMessages] = useState<Array<{ role: 'ai' | 'user'; text: string }>>([
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: 'ai',
-      text: 'Xin chào! Tôi là Trợ Lý Nghiên Cứu NotebookLM AI đồ án Cocoon Vietnam & Cam Consumer. Bạn có câu hỏi nào cần tra cứu sâu từ tập dữ liệu và các biểu đồ không?',
+      text: 'Mình tra cứu trong báo cáo Cocoon, Q&A và bảng khách hàng đã làm sạch. Nếu tài liệu không đủ hoặc có số liệu mâu thuẫn, mình sẽ nêu rõ thay vì tự suy đoán.',
     },
   ]);
   const [inputMsg, setInputMsg] = useState('');
@@ -18,28 +34,22 @@ export function Chapter4Defense() {
   const currentQ = COLD_CALLING_QUESTIONS.find((q) => q.id === activeQuestion) || COLD_CALLING_QUESTIONS[0];
   const isRevealed = !!revealedAnswers[activeQuestion];
 
-  const handleSendChat = () => {
-    if (!inputMsg.trim()) return;
-    const userText = inputMsg;
-    setChatMessages((prev) => [...prev, { role: 'user', text: userText }]);
-    setInputMsg('');
+  const handleSendChat = (question = inputMsg) => {
+    const userText = question.trim();
+    if (!userText || userText.length > MAX_CHAT_LENGTH) return;
 
-    setTimeout(() => {
-      let reply = 'Theo báo cáo thực chứng Cocoon Vietnam: ';
-      const lower = userText.toLowerCase();
-      if (lower.includes('churn') || lower.includes('rời bỏ')) {
-        reply += 'Tỷ lệ rời bỏ trung bình là 45%. Kênh Referral có tỷ lệ Churn cao nhất (64%), trong khi Search Ads thấp nhất (34%). Mốc định nghĩa Churn là 180 ngày không mua.';
-      } else if (lower.includes('q4') || lower.includes('đỉnh') || lower.includes('peak')) {
-        reply += 'Q4/2025 ghi nhận lượng khách mới cao nhất với 39 khách nhờ hiệu ứng mùa lễ hội và khuyến mãi cuối năm của Cocoon.';
-      } else if (lower.includes('gold') || lower.includes('vip')) {
-        reply += 'Hạng Gold VIP có CLV trung vị cao nhất là 4,63 triệu đồng (n=24), nhưng có tới 50% khách hàng đã rời bỏ, gây thiệt hại ước tính 55,56 triệu đồng.';
-      } else if (lower.includes('h1') || lower.includes('cam')) {
-        reply += 'Đối chuẩn Cam Consumer H1/2026: Doanh thu 99.24 tỷ đ, Chi phí 70.17 tỷ đ, Lợi nhuận trước thuế 29.07 tỷ đ, Biên lợi nhuận ròng 29.3%.';
-      } else {
-        reply += 'Tập dữ liệu 300 khách hàng khẳng định tầm quan trọng của việc cá nhân hóa thông điệp tiếp thị và triển khai cảnh báo Churn sớm ở mốc 120 ngày.';
-      }
-      setChatMessages((prev) => [...prev, { role: 'ai', text: reply }]);
-    }, 450);
+    const answer = answerCocoonQuestion(userText);
+    setChatMessages((prev) => [
+      ...prev,
+      { role: 'user', text: userText },
+      {
+        role: 'ai',
+        text: answer.text,
+        sources: answer.sources.map((source) => source.label),
+        hasCaveat: answer.hasCaveat,
+      },
+    ]);
+    setInputMsg('');
   };
 
   return (
@@ -47,13 +57,13 @@ export function Chapter4Defense() {
       <div>
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-extrabold text-[#E69F00] mb-1">
           <HelpCircle className="w-4 h-4" />
-          <span>Chương IV · Phản Biện Hội Đồng & Trợ Lý AI</span>
+          <span>Chương IV · Phản Biện Hội Đồng & Tra Cứu Tài Liệu</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold font-serif text-[#3D2314]">
-          Mô Phỏng Phản Biện Cold Calling & AI Chatbot
+          Mô Phỏng Phản Biện Cold Calling & Tra Cứu Tài Liệu
         </h1>
         <p className="text-xs sm:text-sm text-[#6B4C38] mt-1">
-          Luyện tập trả lời 6 câu hỏi chất vấn hóc búa nhất của Hội đồng đánh giá, kèm đáp án chuẩn khoa học và Trợ lý NotebookLM AI tra cứu số liệu tức thì.
+          Luyện tập với câu hỏi phản biện và tra cứu dữ liệu Cocoon có dẫn nguồn.
         </p>
       </div>
 
@@ -165,7 +175,7 @@ export function Chapter4Defense() {
           </div>
         </div>
 
-        {/* Khung NotebookLM AI Chatbot (5 Cols) */}
+        {/* Khung tra cứu theo tài liệu (5 Cols) */}
         <div className="lg:col-span-5 bg-[#3D2314] text-[#FAF6F0] p-6 rounded-3xl border border-[#4A2E1B] shadow-xl flex flex-col justify-between h-[540px]">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-[#4A2E1B] mb-3">
@@ -174,46 +184,81 @@ export function Chapter4Defense() {
                   <Sparkles className="w-4 h-4" />
                 </span>
                 <div>
-                  <h3 className="font-bold text-sm text-[#FAF6F0] leading-tight">Trợ Lý NotebookLM AI</h3>
-                  <span className="text-[10px] text-[#E69F00]">Đã huấn luyện trên 300 mẫu dữ liệu Cocoon</span>
+                  <h3 className="font-bold text-sm text-[#FAF6F0] leading-tight">Tra cứu theo tài liệu</h3>
+                  <span className="text-xs text-[#E69F00]">Câu trả lời có nguồn đối chiếu</span>
                 </div>
               </div>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] text-[#E5D9C5]">Tra cứu tại chỗ</span>
             </div>
 
-            <div className="space-y-3 overflow-y-auto h-[350px] pr-2 text-xs">
+            <div aria-live="polite" aria-relevant="additions" className="space-y-3 overflow-y-auto h-[350px] pr-2 text-sm">
               {chatMessages.map((msg, i) => (
                 <div
                   key={i}
                   className={`p-3 rounded-2xl max-w-[90%] leading-relaxed ${
                     msg.role === 'ai'
-                      ? 'bg-[#2C1810] text-[#FAF6F0] border border-[#4A2E1B] mr-auto'
+                      ? `${msg.hasCaveat ? 'bg-[#38251A] border-[#9A6A25]' : 'bg-[#2C1810] border-[#4A2E1B]'} text-[#FAF6F0] border mr-auto`
                       : 'bg-[#E69F00] text-[#3D2314] font-semibold ml-auto'
                   }`}
                 >
-                  {msg.text}
+                  <p className="break-words">{msg.text}</p>
+                  {!!msg.sources?.length && (
+                    <div className="mt-2 pt-2 border-t border-[#FAF6F0]/15 text-xs text-[#E8CFA8]">
+                      <span className="font-semibold">Nguồn: </span>
+                      {msg.sources.join(' · ')}
+                    </div>
+                  )}
                 </div>
               ))}
+              {chatMessages.length === 1 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {QUICK_QUESTIONS.map((question) => (
+                    <button
+                      key={question}
+                      type="button"
+                      onClick={() => handleSendChat(question)}
+                      className="max-w-full min-h-11 whitespace-normal break-words rounded-full border border-[#765238] px-3 py-2 text-left text-xs text-[#FAF6F0] transition-colors hover:border-[#E69F00] hover:text-[#F2C24B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E69F00]"
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#4A2E1B] flex gap-2">
-            <input
-              type="text"
-              value={inputMsg}
-              onChange={(e) => setInputMsg(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-              placeholder="Hỏi về Churn, Q4/25, Gold VIP, H1/2026..."
-              className="flex-1 bg-[#2C1810] border border-[#4A2E1B] rounded-xl px-3 py-2 text-xs text-[#FAF6F0] placeholder-[#E5D9C5]/50 focus:outline-none focus:border-[#E69F00]"
-            />
-            <button
-              onClick={handleSendChat}
-              className="p-2 rounded-xl bg-[#E69F00] text-[#3D2314] hover:bg-[#D48800] transition-colors cursor-pointer"
-              title="Gửi câu hỏi"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleSendChat();
+            }}
+            className="pt-3 border-t border-[#4A2E1B]"
+          >
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputMsg}
+                onChange={(event) => setInputMsg(event.target.value)}
+                maxLength={MAX_CHAT_LENGTH}
+                aria-label="Nhập câu hỏi về tài liệu Cocoon"
+                aria-describedby="cocoon-chat-scope"
+                placeholder="Hỏi về CLV, churn, kênh hoặc sản phẩm..."
+                className="min-w-0 flex-1 bg-[#2C1810] border border-[#765238] rounded-xl px-3 py-2 text-base sm:text-sm text-[#FAF6F0] placeholder:text-[#D8C9B8] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E69F00]"
+              />
+              <button
+                type="submit"
+                disabled={!inputMsg.trim()}
+                className="p-2.5 rounded-xl bg-[#E69F00] text-[#3D2314] hover:bg-[#D48800] disabled:opacity-45 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F2C24B]"
+                aria-label="Gửi câu hỏi"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+            <div id="cocoon-chat-scope" className="mt-2 flex items-center justify-between gap-3 text-[11px] text-[#E5D9C5]">
+              <span>Chỉ trả lời trong phạm vi tài liệu. Tối đa {MAX_CHAT_LENGTH} ký tự.</span>
+              <span aria-live="off" className="shrink-0 tabular-nums">{inputMsg.length}/{MAX_CHAT_LENGTH}</span>
+            </div>
+          </form>
         </div>
       </div>
     </div>

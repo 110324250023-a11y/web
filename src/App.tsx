@@ -195,18 +195,38 @@ function RealisticBookReader({
             {isFlipping && turnTarget !== null && (
               <motion.div
                 aria-hidden="true"
+                className="absolute inset-0 z-20 pointer-events-none"
+                initial={{ opacity: 0, backgroundPosition: flipDirection === 'next' ? '135% 0' : '-35% 0' }}
+                animate={{
+                  opacity: [0, 0.58, 0.12, 0],
+                  backgroundPosition: flipDirection === 'next'
+                    ? ['135% 0', '75% 0', '30% 0', '-35% 0']
+                    : ['-35% 0', '30% 0', '75% 0', '135% 0'],
+                }}
+                transition={{ duration: pageTurnDuration, times: [0, 0.32, 0.72, 1], ease: [0.42, 0, 0.18, 1] }}
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, transparent 38%, rgba(45,26,15,.23) 49%, rgba(45,26,15,.06) 53%, transparent 64%)',
+                  backgroundSize: '200% 100%',
+                  filter: 'blur(9px)',
+                }}
+              />
+            )}
+
+            {isFlipping && turnTarget !== null && (
+              <motion.div
+                aria-hidden="true"
                 inert
                 initial={{ rotateY: 0 }}
-                animate={{ rotateY: flipDirection === 'next' ? -180 : 180 }}
+                animate={{
+                  rotateY: flipDirection === 'next' ? -180 : 180,
+                  scaleX: [1, 0.975, 1],
+                }}
                 transition={{ duration: pageTurnDuration, ease: [0.42, 0, 0.18, 1] }}
                 className="absolute inset-0 z-30 pointer-events-none"
                 style={{
                   transformOrigin: 'center center',
                   transformStyle: 'preserve-3d',
-                  boxShadow: flipDirection === 'next'
-                    ? '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)'
-                    : '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)',
-                  backfaceVisibility: 'hidden',
+                  boxShadow: '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)',
                 }}
               >
                 <div
@@ -227,6 +247,24 @@ function RealisticBookReader({
                   </div>
                   <div
                     className={`absolute inset-y-0 ${flipDirection === 'next' ? 'right-0' : 'left-0'} w-[3px] bg-gradient-to-b from-[#d1bd9c] via-white to-[#d1bd9c] shadow-[0_0_9px_rgba(61,35,20,0.2)]`}
+                  />
+                </div>
+                <div
+                  className="absolute inset-0 overflow-hidden bg-[#F7F0E5]"
+                  style={{
+                    transform: 'rotateY(180deg)',
+                    backfaceVisibility: 'hidden',
+                    borderInline: '1px solid rgba(112,78,50,.14)',
+                    boxShadow: flipDirection === 'next'
+                      ? 'inset -18px 0 30px rgba(61,35,20,.10)'
+                      : 'inset 18px 0 30px rgba(61,35,20,.10)',
+                  }}
+                >
+                  <div className="px-6 sm:px-10 md:px-14 py-8">
+                    {renderChapterContent(turnTarget)}
+                  </div>
+                  <div
+                    className={`absolute inset-y-0 ${flipDirection === 'next' ? 'left-0' : 'right-0'} w-[3px] bg-gradient-to-b from-[#d1bd9c] via-white to-[#d1bd9c] shadow-[0_0_9px_rgba(61,35,20,0.2)]`}
                   />
                 </div>
               </motion.div>
