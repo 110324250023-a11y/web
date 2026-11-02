@@ -201,7 +201,7 @@ function RealisticBookReader({
                 transition={{ duration: pageTurnDuration, ease: [0.42, 0, 0.18, 1] }}
                 className="absolute inset-0 z-30 pointer-events-none"
                 style={{
-                  transformOrigin: flipDirection === 'next' ? 'left center' : 'right center',
+                  transformOrigin: 'center center',
                   transformStyle: 'preserve-3d',
                   boxShadow: flipDirection === 'next'
                     ? '0 14px 38px rgba(35,20,12,.20), inset 0 0 24px rgba(61,35,20,.08)'

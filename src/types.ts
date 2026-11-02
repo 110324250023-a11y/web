@@ -24,7 +24,7 @@ export interface TeamMember {
   role: string;
   desc: string;
   avatar: string;
-  tags: string[];
+  studentId: string;
 }
 
 export interface QuarterInfo {

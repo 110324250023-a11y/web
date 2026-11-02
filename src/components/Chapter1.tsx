@@ -64,11 +64,11 @@ export function Chapter1() {
         </div>
       </div>
 
-      {/* Hồ sơ Đội Ngũ Thực Hiện (4 Thành Viên) */}
+      {/* Hồ sơ Đội Ngũ Thực Hiện (7 Thành Viên) */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-[#E69F00]" />
-          <h2 className="text-xl font-bold font-serif text-[#3D2314]">Đội Ngũ Thực Hiện Đồ Án</h2>
+          <h2 className="text-xl font-bold font-serif text-[#3D2314]">Đội Ngũ Thực Hiện Đồ Án (7 thành viên)</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -89,14 +89,9 @@ export function Chapter1() {
               </div>
 
               <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#EFE6D5]">
-                {m.tags.map((t, i) => (
-                  <span
-                    key={i}
-                    className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF6F0] border border-[#EFE6D5] text-[#3D2314] font-medium"
-                  >
-                    {t}
-                  </span>
-                ))}
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF6F0] border border-[#EFE6D5] text-[#3D2314] font-medium">
+                  MSSV: {m.studentId}
+                </span>
               </div>
             </div>
           ))}
